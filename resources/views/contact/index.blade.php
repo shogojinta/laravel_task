@@ -3,7 +3,7 @@
 @section('content')
 <div class="container">
     <div class="row justify-content-center">
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="card">
                 <div class="card-header">Dashboard</div>
 
@@ -18,7 +18,33 @@
                             新規登録
                         </button>
                     </form>
-                    index!
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">id</th>
+                                <th scope="col">name</th>
+                                <th scope="col">title</th>
+                                <th scope="col">time</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            @foreach ($contacts as $contact)
+                            <tr>
+                                <th>{{ $contact->id}}</th>
+                                <td>{{ $contact->your_name}}</td>
+                                <td>{{ $contact->title}}</td>
+                                <td>{{ $contact->created_at}}</td>
+                                <td>
+                                    <a href="{{route('contact.show',['id' => $contact->id])}}">
+                                        詳細を見る
+                                    </a>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
