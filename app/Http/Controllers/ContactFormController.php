@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 
 use App\Models\ContactForm;
 use Illuminate\Support\Facades\DB;
+use App\Services\CheckFormData;
+use App\Http\Requests\StoreContactForm;
 
 class ContactFormController extends Controller
 {
@@ -14,18 +16,31 @@ class ContactFormController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        // $contacts = ContactForm::all();
+        $search = $request->input('search');
 
+        $query = DB::table('contact_forms');
 
-        $contacts = DB::table('contact_forms')
-        ->select('id','your_name','title','created_at')
-        ->orderBy('created_at','desc')
-        ->get();
+        if($search !== null){
+            //全角スペースを半角に
+            $search_split = mb_convert_kana($search,'s');
 
-        // dd($contacts);
-        return view('contact.index',compact('contacts'));
+            //空白で区切る
+            $search_split2 = preg_split('/[\s]+/', $search_split, -1, PREG_SPLIT_NO_EMPTY);
+
+            //単語をループで回す
+            foreach($search_split2 as $value)
+            {
+                $query->where('your_name', 'like', '%'.$value.'%');
+            }
+        };
+
+        $query->select('id', 'your_name', 'title', 'created_at');
+        $query->orderBy('created_at', 'asc');
+        $contacts = $query->paginate(20);
+
+        return view('contact.index', compact('contacts'));
     }
 
     /**
@@ -44,7 +59,7 @@ class ContactFormController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreContactForm $request)
     {
         $contact = new ContactForm;
 
@@ -59,9 +74,6 @@ class ContactFormController extends Controller
         $contact->save();
 
         return redirect('contact/index');
-
-        //dd($your_name, $title);
-
     }
 
     /**
@@ -74,39 +86,11 @@ class ContactFormController extends Controller
     {
       $contact = ContactForm::find($id);
 
-      if($contact->gender === 0){
-        $gender = 'man';
-      }
+      $gender = CheckFormData::checkGender($contact);
 
-      if($contact->gender === 1){
-        $gender = 'woman';
-      }
+      $age = CheckFormData::checkAge($contact);
 
-      if($contact->age === 1){
-        $age = '~19';
-      }
-
-      if($contact->age === 2){
-        $age = '20~29';
-      }
-
-      if($contact->age === 3){
-        $age = '30~39';
-      }
-
-      if($contact->age === 4){
-        $age = '40~49';
-      }
-
-      if($contact->age === 5){
-        $age = '50~59';
-      }
-
-      if($contact->age === 6){
-        $age = '60~';
-      }
-
-      return view('contact.show', compact('contact','gender','age'));
+      return view('contact.show', compact('contact', 'gender', 'age'));
     }
 
     /**
@@ -155,7 +139,7 @@ class ContactFormController extends Controller
     {
         $contact = ContactForm::find($id);
         $contact->delete();
-        
+
         return redirect('contact/index');
     }
 }

@@ -19,6 +19,26 @@
                         </button>
                     </form>
 
+                    <form
+                        method="GET"
+                        action="{{ route('contact.index') }}"
+                        class="form-inline my-2 my-lg-0"
+                    >
+                        <input
+                            class="form-control mr-sm-2"
+                            name="search"
+                            type="search"
+                            placeholder="検索"
+                            aria-label="Search"
+                        >
+                        <button
+                            class="btn btn-outline-success my-2 my-sm-0"
+                            type="submit"
+                        >
+                            検索する
+                        </button>
+                    </form>
+
                     <table class="table">
                         <thead>
                             <tr>
@@ -37,7 +57,9 @@
                                 <td>{{ $contact->title}}</td>
                                 <td>{{ $contact->created_at}}</td>
                                 <td>
-                                    <a href="{{route('contact.show',['id' => $contact->id])}}">
+                                    <a
+                                        href="{{route('contact.show',['id' => $contact->id])}}"
+                                    >
                                         詳細を見る
                                     </a>
                                 </td>
@@ -45,6 +67,9 @@
                             @endforeach
                         </tbody>
                     </table>
+
+                    {{ $contacts->links() }}
+
                 </div>
             </div>
         </div>
